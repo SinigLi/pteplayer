@@ -1,0 +1,24 @@
+#include <algorithm>
+#include <array>
+#include <bitset>
+#include <cassert>
+#include <cstdint>
+#include <functional>
+#include <iosfwd>
+#include <iostream>
+#include <map>
+#include <optional>
+#include <regex>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+#include <boost/operators.hpp>
+#include <boost/range/adaptor/filtered.hpp>
+#include <boost/range/adaptor/reversed.hpp>
+#include <boost/range/iterator_range_core.hpp>
+#include <boost/rational.hpp>
