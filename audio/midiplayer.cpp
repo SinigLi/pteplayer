@@ -122,7 +122,7 @@ void
 MidiPlayer::updateLiveSettings()
 {
     auto settings = mySettingsManager.getReadHandle();
-    myMetronomeEnabled = settings->get(Settings::MetronomeEnabled);
+    myMetronomeEnabled = true;// settings->get(Settings::MetronomeEnabled);
 }
 
 void

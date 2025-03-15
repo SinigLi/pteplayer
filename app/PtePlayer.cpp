@@ -385,7 +385,7 @@ void PtePlayer::setupNewTab()
     myLastBpm = score.getBasicRateBp();
     myLastBar = 0;
 //#ifndef _WIN32
-    myTickPlayer->stop();
+    //myTickPlayer->stop();
     // QMetaObject::invokeMethod(myTickPlayer, &TickPlayer::stop,
     //                           Qt::QueuedConnection);
     // if(mTickPlayer)
@@ -495,7 +495,7 @@ void PtePlayer::rewindPlaybackToStart()
     moveCaretToStart();
 //#ifndef _WIN32
 
-    myTickPlayer->stop();
+    //myTickPlayer->stop();
     // QMetaObject::invokeMethod(myTickPlayer, &TickPlayer::stop,
     //                           Qt::QueuedConnection);
 //#endif // !_WIN32
@@ -624,6 +624,18 @@ void PtePlayer::createTabArea()
 PtePlayer::~PtePlayer()
 {
     delete ui;
+    myMidiPlayer->moveToThread(this->thread());
+	if (myMidiPlayer)
+	{
+		delete myMidiPlayer;
+		myMidiPlayer = nullptr;
+	}
+    while (!myMidiThread->isFinished())
+    {
+        myMidiThread->quit();
+		myMidiThread->exit();
+    } 
+    myMidiThread.reset();
 }
 
 QGraphicsScene *
@@ -842,14 +854,14 @@ PtePlayer::createTickThread()
 //#ifndef _WIN32
     myTickThread = std::make_unique<QThread>();
     // myTickPlayer = new TickPlayer(myTickThread.get());
-    myTickPlayer = new TickPlayer(this);
+    //myTickPlayer = new TickPlayer(this);
     // connect(myTickThread.get(), &QThread::finished, myTickPlayer,
     //         &QObject::deleteLater);
     // myTickPlayer->moveToThread(myTickThread.get());
     // myTickThread->start();
     // QMetaObject::invokeMethod(myTickPlayer, &TickPlayer::init,
     //                           Qt::QueuedConnection);
-     myTickPlayer->init();
+     //myTickPlayer->init();
 //#endif
 }
 
@@ -867,8 +879,8 @@ void PtePlayer::moveCaretToSystem(int system)
     //                           Qt::QueuedConnection);
     qDebug() << "myTickPlayer moveCaretToSystem ";
     if(myIsPlaying){
-        myTickPlayer->stop();
-        myTickPlayer->start();
+        //myTickPlayer->stop();
+        //myTickPlayer->start();
     }
     //mTickPlayer->play();
 //#endif
@@ -904,8 +916,8 @@ void PtePlayer::moveCaretToPosition(int position)
         //                           Qt::QueuedConnection);
         qDebug() << "myTickPlayer moveCaretToPosition";
         if(myIsPlaying){
-            myTickPlayer->stop();
-            myTickPlayer->start();
+            //myTickPlayer->stop();
+            //myTickPlayer->start();
         }
     }
 
@@ -921,17 +933,17 @@ void PtePlayer::moveCaretToPosition(int position)
         //                           },
         //                           Qt::QueuedConnection);
 
-        qDebug() << "myTickPlayer moveCaretToPosition 2";
-        double curRate = myTickPlayer->curPlayRate();
-        curRate *= ((double)curbpm / (double)myLastBpm);
-        if(myIsPlaying){
+        //qDebug() << "myTickPlayer moveCaretToPosition 2";
+        //double curRate = myTickPlayer->curPlayRate();
+        //curRate *= ((double)curbpm / (double)myLastBpm);
+        //if(myIsPlaying){
 
-            myTickPlayer->stop();
-            myTickPlayer->setPlayerOpts(myTickPlayer->curTickName(),curRate);
-            myTickPlayer->start();
-            // mTickPlayer->stop();
-            //mTickPlayer->play();
-        }
+        //    myTickPlayer->stop();
+        //    myTickPlayer->setPlayerOpts(myTickPlayer->curTickName(),curRate);
+        //    myTickPlayer->start();
+        //    // mTickPlayer->stop();
+        //    //mTickPlayer->play();
+        //}
     }
     //#endif
     getCaret().moveToPosition(position);
@@ -1020,8 +1032,8 @@ void PtePlayer::startStopPlayback(bool from_measure_start)
         //                 },
         //                           Qt::QueuedConnection);
 
-        myTickPlayer->stop();
-        myTickPlayer->setPlayerOpts(tname,rate);
+        //myTickPlayer->stop();
+        //myTickPlayer->setPlayerOpts(tname,rate);
         // QMetaObject::invokeMethod(
         //     myTickPlayer,
         //     [tname,rate,this]()
@@ -1051,10 +1063,10 @@ void PtePlayer::startStopPlayback(bool from_measure_start)
 
         enableEditing(true);
         updateCommands();
-        qDebug() << "myTickPlayer->stop() play back end";
+        //qDebug() << "myTickPlayer->stop() play back end";
 //#ifndef _WIN32
         // myTickPlayer->pausePlayer();
-        myTickPlayer->stop();
+        //myTickPlayer->stop();
         // QMetaObject::invokeMethod(myTickPlayer, &TickPlayer::pause,
         //                           Qt::QueuedConnection);
         // QMetaObject::invokeMethod(
@@ -1569,7 +1581,7 @@ void PtePlayer::scorePerFormCountInStart()
     qDebug() << "myTickPlayer scorePerFormCountInStart ";
 //#ifndef _WIN32
 
-    myTickPlayer->start();
+    //myTickPlayer->start();
     // QMetaObject::invokeMethod(myTickPlayer, &TickPlayer::start,
     //                           Qt::QueuedConnection);
 //#endif // !_WIN32
@@ -1582,7 +1594,7 @@ void PtePlayer::scorePerFormCountInEnd()
 
     // QMetaObject::invokeMethod(myTickPlayer, &TickPlayer::stop,
     //                           Qt::QueuedConnection);
-    myTickPlayer->stop();
+    //myTickPlayer->stop();
 //#endif // !_WIN32
     qDebug()<<"scorePerFormCountInEnd ";
 }
@@ -1595,7 +1607,7 @@ void PtePlayer::playerBackStart()
     }
 //#ifndef _WIN32
 
-    myTickPlayer->start();
+    //myTickPlayer->start();
     // QMetaObject::invokeMethod(myTickPlayer, &TickPlayer::start,
     //                           Qt::QueuedConnection);
 //#endif // !_WIN32

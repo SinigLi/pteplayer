@@ -1,4 +1,4 @@
-/*
+﻿/*
   * Copyright (C) 2011 Cameron White
   *
   * This program is free software: you can redistribute it and/or modify
@@ -17,16 +17,60 @@
   
 #include "midioutputdevice.h"
 
-//#include <RtMidi.h>
+#include <RtMidi.h>
 #include <exception>
 #include <score/dynamic.h>
 #include <score/generalmidi.h>
 #include <cassert>
+
+#include <QAudioDevice>
+#include <QMediaDevices>
+#include <QMediaPlayer>
+#include <QAudioOutput>
+#include <QAudioSink>
+#include <QBuffer>
+#include <QAudioDecoder>
 #include <QDebug>
 #ifdef __APPLE__
 #include "midisoftwaresynth.h"
 #endif
+double midiNoteToFrequency(int midiNote) {
+	return 440.0 * std::pow(2.0, (midiNote - 69) / 12.0);
+}
+// 生成正弦波
+QByteArray generateSineWave(int midiNote) {
+	//double frequency = midiNote / 127.0;// midiNoteToFrequency(midiNote);
+	double frequency =  midiNoteToFrequency(midiNote);
+  //  if (midiNote == 127)
+  //  {
+  //      frequency = 880*2;
+  //  }
+  //  else
+  //  {
+		//frequency = 440*2;
+  //  }
+	int sampleRate = 8000;  // 采样率 
+	int duration = 1;        // 播放 1 秒
+	int totalSamples = sampleRate * duration;
+    double normFre = 2 * M_PI / sampleRate;
+    double scale = frequency * normFre;
+	QByteArray byteArray;
+    byteArray.reserve(totalSamples);
+	// 计算每个采样点的值
+	for (int i = 0; i < totalSamples; ++i) {
+		// 计算正弦波值
+		//double sample = frequency;// std::sin(2 * M_PI * frequency * i / sampleRate);
+		double sample = std::sin(scale  * i );
 
+		//short int16Sample = static_cast<short>(sample * 32767); // 16-bit 音频
+		short int16Sample = static_cast<short>(sample * 32767); // 16-bit 音频
+
+		// 将数据转为字节流
+		byteArray.append(reinterpret_cast<char*>(&int16Sample), sizeof(int16Sample));
+    }
+
+	return byteArray;
+}
 MidiOutputDevice::MidiOutputDevice() /*: myMidiOut(nullptr)*/
 {
     // Initialize the OSX software synth.
@@ -60,6 +104,7 @@ MidiOutputDevice::MidiOutputDevice() /*: myMidiOut(nullptr)*/
     //    {
     //        // Continue anyway, another API might work.
     //        e.printMessage();
+    //        qDebug()<<"err midi:"<<e.what();
     //    }
     //}
 }
@@ -67,8 +112,24 @@ MidiOutputDevice::MidiOutputDevice() /*: myMidiOut(nullptr)*/
 MidiOutputDevice::~MidiOutputDevice()
 {
     // Make sure there aren't any lingering notes.
-    //if (myMidiOut)
-    //    stopAllNotes();
+    if (myMidiOut)
+        stopAllNotes();
+
+	if (myCurOutput)
+	{
+        stopOutAudio();
+		//mfile.close();
+		//myCurOutput->stop();
+
+		//while (QAudio::State::StoppedState != myCurOutput->state())
+		//{
+
+		//}
+		//myCurOutput->moveToThread();
+		myCurOutput->deleteLater();
+		//delete myCurOutput;
+		myCurOutput = nullptr;
+	}
 }
 
 void
@@ -82,18 +143,78 @@ MidiOutputDevice::stopAllNotes()
         // Stop all notes.
         sendMidiMessage(ControlChange + channel, AllNotesOff, 0);
     }
+    stopOutAudio();
+
 }
 
-void
+
+void MidiOutputDevice::stopOutAudio()
+{
+	myCurOutput->stop();
+	//mfile.close();
+	//mfile.open(QIODevice::ReadOnly);
+	while (QAudio::State::StoppedState != myCurOutput->state())
+	{
+
+	}
+	if (myBuff)
+	{
+		delete myBuff;
+		myBuff = nullptr;
+	}
+}
+
+bool
 MidiOutputDevice::sendMessage(const std::vector<uint8_t> &data)
 {
-    //myMidiOut->sendMessage(&data);
+    if (data.empty()) {
+
+        return false;
+    }
+    if (data.size() == 3)
+    {
+		if (data[0] == 153)
+		{//节拍器音符
+            // QAudioDecoder d;
+            // d.read();
+            uint8_t pitch = data[1];
+            if (data[2] != 127)
+            {
+                pitch = 59;
+            }
+			QByteArray audioData = generateSineWave(pitch);
+			myBuff = new QBuffer();
+			myBuff->setData(audioData);
+			myBuff->open(QIODevice::ReadOnly);
+            myCurOutput->setVolume(data[2]/127.0);
+			myCurOutput->start(myBuff);
+		}
+		else if (data[0] == 128 + 9)
+		{//节拍器结束符号
+			stopOutAudio();
+		}
+		else {
+			bool what = true;
+		}
+    }
+    return true;
+	try
+	{
+		//myMidiOut->sendMessage(&message);
+		myMidiOut->sendMessage(&data);
+	}
+	catch (RtMidiError& e)
+	{
+		e.printMessage();
+		return false;
+	}
+    return true;
 }
 
 bool MidiOutputDevice::sendMidiMessage(unsigned char a, unsigned char b,
                                        unsigned char c)
 {
-    return true;
+    // return true;
     std::vector<uint8_t> message;
 
     message.push_back(a);
@@ -104,6 +225,7 @@ bool MidiOutputDevice::sendMidiMessage(unsigned char a, unsigned char b,
     if (c <= 127)
         message.push_back(c);
 
+    return sendMessage(message);
     //try
     //{
     //    myMidiOut->sendMessage(&message);
@@ -114,43 +236,70 @@ bool MidiOutputDevice::sendMidiMessage(unsigned char a, unsigned char b,
     //    return false;
     //}
 
-    return true;
+    //return true;
 }
-
 bool MidiOutputDevice::initialize(size_t preferredApi,
                                   unsigned int preferredPort)
 {
+    if (!myCurOutput)
+	{
+		QAudioFormat format;
+		format.setSampleRate(8000); // 采样率 44.1 kHz
+		format.setChannelCount(1);   // 单声道
+		//format.setSampleFormat(QAudioFormat::UInt8);
+		format.setSampleFormat(QAudioFormat::Int16);
+        
+		//format.setSampleRate(16);    // 16 位深度
+		//format.setSampleFormat();
+		//format.setByteOrder(QAudioFormat::LittleEndian);
+		//format.setSampleType(QAudioFormat::SignedInt);
+        //mfile.setFileName("G:/music_projs/pteplayer/music/tick-4-4-120bp.wav");
+        //mfile.open(QIODevice::ReadOnly);
+        QAudioDevice info(QMediaDevices::defaultAudioOutput());
+        if (!info.isFormatSupported(format))
+        {
+            bool pause = true;
+        }
+
+		myCurOutput = new QAudioSink(QMediaDevices::defaultAudioOutput(), format);
+        //QByteArray audioData = generateSineWave(440);
+        //myBuff = new QBuffer();
+        //myBuff->setData(audioData);
+        //myBuff->open(QIODevice::ReadOnly);
+
+        //myCurOutput->start(myBuff);
+    }
     return true;
-    //if (myMidiOut)
-    //    myMidiOut->closePort(); // Close any open ports.
-    //qDebug()<<"myMidiOuts.size() "<<myMidiOuts.size();
-    //if (preferredApi >= myMidiOuts.size())
-    //    return false;
+    if (myMidiOut)
+        myMidiOut->closePort(); // Close any open ports.
+    qDebug()<<"myMidiOuts.size() "<<myMidiOuts.size();
+    if (preferredApi >= myMidiOuts.size())
+        return false;
 
-    //myMidiOut = myMidiOuts[preferredApi].get();
-    //unsigned int num_ports = myMidiOut->getPortCount();
+    myMidiOut = myMidiOuts[preferredApi].get();
+    unsigned int num_ports = myMidiOut->getPortCount();
 
-    //qDebug()<<"num_ports "<<num_ports;
-    //if (num_ports == 0)
-    //    return false;
+    qDebug()<<"num_ports "<<num_ports;
+    if (num_ports == 0)
+        return false;
+    return true;
+    try
+    {
+        myMidiOut->openPort(preferredPort);
+    }
+    catch (RtMidiError &e)
+    {
+        //qDebug()<<"err message "<<e.getMessage();
+        e.printMessage();
+        return false;
+    }
 
-    //try
-    //{
-    //    myMidiOut->openPort(preferredPort);
-    //}
-    //catch (RtMidiError &e)
-    //{
-    //    //qDebug()<<"err message "<<e.getMessage();
-    //    e.printMessage();
-    //    return false;
-    //}
-
-    //return true;
+    return true;
 }
 
 size_t MidiOutputDevice::getApiCount()
 {
-    return 0;
+     return 0;
     //return myMidiOuts.size();
 }
 
@@ -158,7 +307,7 @@ unsigned int MidiOutputDevice::getPortCount(size_t api)
 {
     //assert(api < myMidiOuts.size() && "Programming error, api doesn't exist");
     //return myMidiOuts[api]->getPortCount();
-    return 0;
+     return 0;
 }
 
 std::string MidiOutputDevice::getPortName(size_t api, unsigned int port)
@@ -170,7 +319,7 @@ std::string MidiOutputDevice::getPortName(size_t api, unsigned int port)
 
 bool MidiOutputDevice::setPatch(int channel, uint8_t patch)
 {
-    return true;
+    // return true;
     if (patch > 127)
     {
         patch = 127;
@@ -273,7 +422,7 @@ void MidiOutputDevice::setPitchBendRange(int channel, uint8_t semiTones)
 
 void MidiOutputDevice::setChannelMaxVolume(int channel, uint8_t newMaxVolume)
 {
-    return ;
+     return ;
     assert(newMaxVolume <= 127);
 
     const bool maxVolumeChanged = myMaxVolumes[channel] != newMaxVolume;

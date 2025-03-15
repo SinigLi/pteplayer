@@ -1,5 +1,5 @@
 #include "TickPlayer.h"
-
+#include <QAudioSink>
 TickPlayer::TickPlayer(QObject *parent):QObject(parent)
 {
 
@@ -14,6 +14,7 @@ void TickPlayer::init()
     QAudioDevice device = allD.at(0);
     if(!mTickOutPut)
     {
+        QAudioSink sink;
         mTickOutPut= new QAudioOutput(this);
     }
     mTickOutPut->setDevice(device);

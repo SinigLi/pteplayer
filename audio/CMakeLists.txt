@@ -4,7 +4,7 @@ project(ptaudio VERSION 1.0 LANGUAGES C CXX)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 find_package(QT NAMES Qt5 Qt6 REQUIRED COMPONENTS Core)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Concurrent Gui Network PrintSupport Sql Svg Widgets Xml)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Concurrent Gui Network Multimedia PrintSupport Sql Svg Widgets Xml)
 
 qt_standard_project_setup()
 
@@ -17,13 +17,14 @@ target_include_directories(ptaudio PUBLIC
     ..
     ../third_part
     ${BOOST_INCLUDE_PATH}
-    # ../third_part/rtmidi-6.0.0
+    ../third_part/rtmidi
 )
 
 target_link_libraries(ptaudio PUBLIC
     Qt::Concurrent
     Qt::Core
     Qt::Gui
+    Qt::Multimedia
     Qt::Network
     Qt::PrintSupport
     Qt::Sql

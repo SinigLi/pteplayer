@@ -12,7 +12,12 @@ project( pteplayer )
 add_subdirectory( third_part/pugi )
 add_subdirectory( third_part/minizip-tools )
 
-# add_subdirectory( actions )
+add_subdirectory( third_part/rtmidi )
+
+# if(ANDROID)
+#     add_subdirectory( third_part/others/android/alsa )
+# endif(ANDROID)
+
 
 add_subdirectory( actions )
 add_subdirectory( app )

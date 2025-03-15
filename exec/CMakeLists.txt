@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(pteplayer VERSION 1.0 LANGUAGES C CXX)
+project(pteplayer VERSION 1.01 LANGUAGES C CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -160,6 +160,7 @@ target_link_libraries(pteplayer PRIVATE
 	ptewidgets
         minizip
         pugixml-static
+        rtmidi
     ${boost_container_lib}
     ${boost_date_time_lib}
     ${boost_exception_lib}
@@ -182,6 +183,12 @@ target_link_libraries(pteplayer PRIVATE
     # ${minizip_lib}
     ${LINKLIBS}
 )
+
+# if(ANDROID)
+# target_link_libraries(pteplayer PRIVATE
+#     alsa
+# )
+# endif(ANDROID)
 
 # Resources:
 set_source_files_properties("../fonts/LiberationSans-Regular.ttf"
@@ -617,12 +624,12 @@ qt_add_resources(pteplayer "resources2"
 )
 
 
-set_source_files_properties("../music/tick-4-4-120bp.wav"
-    PROPERTIES QT_RESOURCE_ALIAS "tick-4-4-120bp"
-)
-set(resources3_resource_files
-    "../music/tick-4-4-120bp.wav"
-)
+# set_source_files_properties("../music/tick-4-4-120bp.wav"
+#     PROPERTIES QT_RESOURCE_ALIAS "tick-4-4-120bp"
+# )
+# set(resources3_resource_files
+#     "../music/tick-4-4-120bp.wav"
+# )
 
 qt_add_resources(pteplayer "resources3"
     PREFIX

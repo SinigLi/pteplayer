@@ -41,6 +41,39 @@
 #include <QFile>
 #include <app/ScoreFileLoader.h>
 
+#include <streambuf>
+class QRDebuff:public std::streambuf
+{
+
+
+    // basic_streambuf interface
+protected:
+    std::streamsize xsputn(const char_type *__s, std::streamsize __n) override
+    {
+        std::string str(__s,__n);
+        buffer = QString::fromStdString(str);
+        // buffer.append(__s, __n);
+        flushBuffer();
+        return __n;
+    }
+    int_type overflow(int_type c) override
+    {
+        if (c != EOF) {
+            buffer += static_cast<char>(c);
+            if (c == '\n') {
+                flushBuffer();
+            }
+        }
+        return c;
+    }
+    void flushBuffer() {
+        if (!buffer.isEmpty()) {
+            qDebug()<<buffer;
+            buffer.clear();
+        }
+    }
+    QString buffer;
+};
 
 /**/
 
@@ -280,6 +313,8 @@ int main(int argc, char *argv[])
     std::signal(SIGSEGV, signalHandler);
 
     Application a(argc, argv);
+    QRDebuff coutbuffer;
+    std::streambuf* oldCoutBuf = std::cout.rdbuf(&coutbuffer);  // 替换 cout 缓冲区
 
     // Set the app information (used by e.g. QSettings).
     QCoreApplication::setOrganizationName(AppInfo::ORGANIZATION_NAME);
@@ -414,7 +449,7 @@ int main(int argc, char *argv[])
     builtInStyles << QLatin1String("Windows");
 #endif
     engine.addImageProvider(QLatin1String("standardicons"), new StandardIconProvider(a.style()));
-
+    std::cout<<"test cout ...\r\n";
     engine.setInitialProperties({{ "builtInStyles", builtInStyles }});
     engine.load(QUrl("qrc:/gallery.qml"));
     if (engine.rootObjects().isEmpty())

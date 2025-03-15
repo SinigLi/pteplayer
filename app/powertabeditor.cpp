@@ -290,10 +290,10 @@ void PowerTabEditor::openFile(QString filename)
     {
         Document &doc = myDocumentManager->addDocument(*mySettingsManager);
         Score &score = doc.getScore();
-        for (auto& oneplayer : score.getPlayers())
-        {
-            oneplayer.setMaxVolume(0);
-        }
+        //for (auto& oneplayer : score.getPlayers())
+        //{
+        //    oneplayer.setMaxVolume(0);
+        //}
         myFileFormatManager->importFile(doc.getScore(), path, *format);
         auto end = std::chrono::high_resolution_clock::now();
         qDebug() << "File loaded in"

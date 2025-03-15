@@ -73,6 +73,16 @@ ScoreChart::ScoreChart(QQuickItem *parent)
     // connect(this,&QQuickItem::heightChanged,
     //         this,&ScoreChart::_scaleChanged);
 }
+
+ScoreChart::~ScoreChart()
+{
+    if (m_player)
+    {
+        delete m_player;
+        m_player = nullptr;
+    }
+}
+
 //![0]
 
 // QString ScoreChart::name() const
@@ -334,7 +344,8 @@ QVariantList ScoreChart::curPlayerSetting() const
         QVariantMap onevalue;
         onevalue["name"]=one.name;
         onevalue["tab_stuff_show"]=one.tab_stuff_show;
-        onevalue["std_stuff_show"]=one.std_stuff_show;
+		onevalue["std_stuff_show"] = one.std_stuff_show;
+		onevalue["number_stuff_show"] = one.number_stuff_show;
         onevalue["activated"]=one.activated;
         result.push_back(onevalue);
     }

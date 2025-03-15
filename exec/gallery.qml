@@ -22,14 +22,14 @@ ApplicationWindow {
     //! [orientation]
 
     function help() {
-        let displayingControl = listView.currentIndex !== -1
-        let currentControlName = displayingControl
-            ? listView.model.get(listView.currentIndex).title.toLowerCase() : ""
-        let url = "https://doc.qt.io/qt-6/"
-            + (displayingControl
-               ? "qml-qtquick-controls2-" + currentControlName + ".html"
-               : "qtquick-controls2-qmlmodule.html");
-        Qt.openUrlExternally(url)
+        // let displayingControl = listView.currentIndex !== -1
+        // let currentControlName = displayingControl
+        //     ? listView.model.get(listView.currentIndex).title.toLowerCase() : ""
+        // let url = "https://doc.qt.io/qt-6/"
+        //     + (displayingControl
+        //        ? "qml-qtquick-controls2-" + currentControlName + ".html"
+        //        : "qtquick-controls2-qmlmodule.html");
+        // Qt.openUrlExternally(url)
     }
 
     required property var builtInStyles
@@ -129,7 +129,7 @@ ApplicationWindow {
         onTriggered: {
             if (stackView.depth > 1) {
                 stackView.pop()
-                listView.currentIndex = -1
+                // listView.currentIndex = -1
                 titleLabel.text="PtePlayer";
             } else {
                 // drawer.open()
@@ -156,7 +156,7 @@ ApplicationWindow {
         RowLayout {
             spacing: 20
             anchors.fill: parent
-            anchors.leftMargin: !window.portraitMode ? drawer.width : undefined
+            // anchors.leftMargin: !window.portraitMode ? drawer.width : undefined
 
             ToolButton {
                 action: navigateBackAction
@@ -181,16 +181,16 @@ ApplicationWindow {
                     x: parent.width - width
                     transformOrigin: Menu.TopRight
 
+                    // Action {
+                    //     text: qsTr("Settings")
+                    //     onTriggered: settingsDialog.open()
+                    // }
+                    // Action {
+                    //     text: qsTr("Help")
+                    //     onTriggered: window.help()
+                    // }
                     Action {
-                        text: qsTr("Settings")
-                        onTriggered: settingsDialog.open()
-                    }
-                    Action {
-                        text: qsTr("Help")
-                        onTriggered: window.help()
-                    }
-                    Action {
-                        text: qsTr("About")
+                        text: qsTr("说明")
                         onTriggered: aboutDialog.open()
                     }
                 }
@@ -202,10 +202,10 @@ ApplicationWindow {
 
     StackView {
         id: stackView
-        width: parent.width
-        height: parent.height
+        // width: parent.width
+        // height: parent.height
         anchors.fill: parent
-        anchors.leftMargin: !window.portraitMode ? drawer.width : undefined
+        // anchors.leftMargin: !window.portraitMode ? drawer.width : undefined
         function stackLargeSize(){
             return stackView.height>stackView.width?stackView.height:stackView.width;
         }
@@ -227,8 +227,8 @@ ApplicationWindow {
 
         initialItem: Pane {
             id: pane
-            width: stackView.width
-            height: stackView.height
+            // width: stackView.width
+            // height: stackView.height
             anchors.fill: parent
             Column
             {
@@ -511,7 +511,7 @@ ApplicationWindow {
         id: aboutDialog
         modal: true
         focus: true
-        title: qsTr("About")
+        title: qsTr("程序说明")
         x: (window.width - width) / 2
         y: window.height / 6
         width: Math.min(window.width, window.height) / 3 * 2
@@ -519,21 +519,39 @@ ApplicationWindow {
 
         Column {
             id: aboutColumn
-            spacing: 20
+            spacing: 10
 
             Label {
                 width: aboutDialog.availableWidth
-                text: qsTr("The Qt Quick Controls module delivers the next generation user interface controls based on Qt Quick.")
+                text: qsTr("该程序为个人开源软件，禁止用于非法盈利！")
                 wrapMode: Label.Wrap
                 font.pixelSize: 12
             }
 
             Label {
                 width: aboutDialog.availableWidth
-                text: qsTr("In comparison to Qt Quick Controls 1, Qt Quick Controls "
-                    + "are an order of magnitude simpler, lighter, and faster.")
+                text: qsTr("目前唯一更新渠道为微信公众号：<b>SingLYX</b> 中文名称：<b>平静的爆炸头</b> "
+                            +"可添加微信公众号查看相关教程并获得吉他谱子!")
                 wrapMode: Label.Wrap
                 font.pixelSize: 12
+            }
+            Label {
+                width: aboutDialog.availableWidth
+                text: qsTr("该软件还没有上架到个平台应用商店，其他渠道安装导致一切问题不负相关责任")
+                wrapMode: Label.Wrap
+                font.pixelSize: 12
+            }
+            RoundButton {
+                anchors.horizontalCenter: parent.horizontalCenter
+                // anchors.left: score_groups.right
+                // width: parent.height
+                // height: parent.height
+                id: help_btn
+                text: "点击跳转到开源网址!"
+                onClicked:
+                {
+                    Qt.openUrlExternally("https://github.com/SinigLi/pteplayer/tree/main");
+                }
             }
         }
     }

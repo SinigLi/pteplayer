@@ -30,8 +30,11 @@
 #include <memory>
 #include <string>
 #include <vector>
-
-//class RtMidiOut;
+#include <QFile>
+//class QAudioDevice;
+class QAudioSink;
+class QBuffer;
+class RtMidiOut;
 //typedef unsigned int uint8_t ;
 class MidiOutputDevice
 {
@@ -84,20 +87,26 @@ public:
         AllNotesOff = 123
     };
 
-    void sendMessage(const std::vector<uint8_t> &data);
+    bool sendMessage(const std::vector<uint8_t> &data);
 
     // Stops notes on all channels. Useful if playback was interrupted.
     void stopAllNotes();
 
+    void stopOutAudio();
+
 private:
     bool sendMidiMessage(unsigned char a, unsigned char b, unsigned char c);
 
-    //std::vector<std::unique_ptr<RtMidiOut>> myMidiOuts;
-    //RtMidiOut *myMidiOut=nullptr;
+    std::vector<std::unique_ptr<RtMidiOut>> myMidiOuts;
+    RtMidiOut *myMidiOut=nullptr;
     /// Maximum volume for each channel (as set in the mixer).
     std::array<uint8_t, NUM_CHANNELS> myMaxVolumes;
     /// Volume of last active dynamic for each channel.
     std::array<uint8_t, NUM_CHANNELS> myActiveVolumes;
+    //QAudioDevice* myCurDevice = nullptr;
+    QAudioSink* myCurOutput = nullptr;
+    QBuffer* myBuff = nullptr;
+    //QFile mfile;
 };
 
 #endif

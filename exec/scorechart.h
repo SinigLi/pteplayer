@@ -64,7 +64,7 @@ class ScoreChart : public QQuickPaintedItem
     QML_ELEMENT
 public:
     ScoreChart(QQuickItem *parent = 0);
-
+    ~ScoreChart();
     // QString name() const;
     // void setName(const QString &name);
 
