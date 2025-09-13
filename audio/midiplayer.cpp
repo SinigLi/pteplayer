@@ -376,6 +376,7 @@ MidiPlayer::performCountIn(const Score &score, const SystemLocation &location,
     // Load preferences.
     uint8_t velocity;
     uint8_t preset;
+    uint8_t firstpreset;
     {
         auto settings = mySettingsManager.getReadHandle();
 
@@ -385,6 +386,8 @@ MidiPlayer::performCountIn(const Score &score, const SystemLocation &location,
         velocity = settings->get(Settings::CountInVolume);
         preset = settings->get(Settings::CountInPreset) +
                  Midi::MIDI_PERCUSSION_PRESET_OFFSET;
+        firstpreset = 76;
+        preset = 70;
     }
 
     // Figure out the time signature where playback is starting.
@@ -413,10 +416,14 @@ MidiPlayer::performCountIn(const Score &score, const SystemLocation &location,
         {
             return;
         }
-
-        myDevice->playNote(METRONOME_CHANNEL, preset, velocity);
+        int pitch = preset;
+        if (i == 0)
+        {
+            pitch = firstpreset;
+        }
+        myDevice->playNote(METRONOME_CHANNEL, pitch, velocity);
         std::this_thread::sleep_for(tick_duration);
-        myDevice->stopNote(METRONOME_CHANNEL, preset);
+        myDevice->stopNote(METRONOME_CHANNEL, pitch);
     }
     emit performCountInEnd();
 }

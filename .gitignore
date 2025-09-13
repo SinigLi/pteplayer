@@ -2,3 +2,5 @@
 *.user
 /build
 *.ufyoMg
+audio/midioutputdevice - 副本.cpp
+audio/midioutputdevice - 副本.h

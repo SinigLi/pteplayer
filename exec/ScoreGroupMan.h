@@ -16,6 +16,7 @@ public:
 
 
     Q_INVOKABLE QStringList getScoreNamesByGroup(const QString &groupName)const;
+    Q_INVOKABLE QStringList getScoreNamesByGroupFilter(const QString &groupName,const QString &filter)const;
     Q_INVOKABLE QString newScoreGroup();
     Q_INVOKABLE void delScoreGroup(const QString &groupName);
     Q_INVOKABLE QString getScoreFilePath(const QString &groupname,const QString &scoreName)const;

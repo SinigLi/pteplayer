@@ -60,7 +60,7 @@ QByteArray generateSineWave(int midiNote) {
 	for (int i = 0; i < totalSamples; ++i) {
 		// 计算正弦波值
 		//double sample = frequency;// std::sin(2 * M_PI * frequency * i / sampleRate);
-		double sample = std::sin(scale  * i );
+        double sample =  std::sin(scale * i);
 
 		//short int16Sample = static_cast<short>(sample * 32767); // 16-bit 音频
 		short int16Sample = static_cast<short>(sample * 32767); // 16-bit 音频
@@ -180,14 +180,18 @@ MidiOutputDevice::sendMessage(const std::vector<uint8_t> &data)
             uint8_t pitch = data[1];
             if (data[2] != 127)
             {
-                pitch = 59;
+                pitch = 70;
             }
-			QByteArray audioData = generateSineWave(pitch);
-			myBuff = new QBuffer();
-			myBuff->setData(audioData);
-			myBuff->open(QIODevice::ReadOnly);
-            myCurOutput->setVolume(data[2]/127.0);
-			myCurOutput->start(myBuff);
+            //if (myCurOutput->state() != QAudio::State::ActiveState)
+            {
+				QByteArray audioData = generateSineWave(pitch);
+				myBuff = new QBuffer();
+				myBuff->setData(audioData);
+				myBuff->open(QIODevice::ReadOnly);
+				myCurOutput->setVolume(data[2] / 127.0);
+				auto device = myCurOutput->start();
+                device->write(audioData);
+            }
 		}
 		else if (data[0] == 128 + 9)
 		{//节拍器结束符号

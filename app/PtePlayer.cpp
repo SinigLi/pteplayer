@@ -306,14 +306,15 @@ void PtePlayer::setupNewTab()
 		{
 			QString playstr = QString::fromStdString(oneplayer.getDescription());
 			doc.getViewOptions().showStdStuffs().push_back(false);
-			doc.getViewOptions().showNumberStuffs().push_back(false);
 			if (playstr.contains(QString::fromWCharArray(L"旋律")))
 			{
 				doc.getViewOptions().showTabStuffs().push_back(false);
+				doc.getViewOptions().showNumberStuffs().push_back(true);
 			}
 			else
 			{
 				doc.getViewOptions().showTabStuffs().push_back(true);
+				doc.getViewOptions().showNumberStuffs().push_back(false);
 			}
 
 		}
@@ -753,7 +754,8 @@ QList<ScoreSettingInfos::PlayerSetInfo> PtePlayer::orgPlayerSetInfos() const
         // doc.getViewOptions().showStdStuffs().push_back(false);
         if (playstr.contains(QString::fromWCharArray(L"旋律")))
         {
-            oneinfo.tab_stuff_show = false;
+			oneinfo.tab_stuff_show = false;
+			oneinfo.number_stuff_show = true;
             // doc.getViewOptions().showTabStuffs().push_back(false);
         }
         else

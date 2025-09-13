@@ -19,6 +19,21 @@ QStringList ScoreGroupMan::getScoreNamesByGroup(const QString &groupName) const
     return scoreNames;
 }
 
+QStringList ScoreGroupMan::getScoreNamesByGroupFilter(const QString &groupName,
+                                                      const QString &filter) const
+{
+    QStringList res = getScoreNamesByGroup(groupName);
+    QStringList ret;
+    for(QString one:res)
+    {
+        if(one.contains(filter,Qt::CaseInsensitive))
+        {
+            ret.push_back(one);
+        }
+    }
+    return ret;
+}
+
 QString ScoreGroupMan::newScoreGroup()
 {
     QString path = QFileDialog::getExistingDirectory(nullptr,QString::fromWCharArray(L"选择文件夹"));

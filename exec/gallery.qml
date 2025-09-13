@@ -45,7 +45,17 @@ ApplicationWindow {
         log_label.text=qsTr("请双击选中对应乐谱进入演奏模式：");
         score_list.model=scoreLs;
     }
-
+    function reloadScoreLsFilter(groupname,filter)
+    {
+        var scoreLs = score_man.getScoreNamesByGroupFilter(groupname,filter);
+        if(scoreLs.length===0){
+            log_label.text=qsTr("乐谱组数据列表为空:")+groupname;
+            score_list.model=[];
+            return;
+        }
+        log_label.text=qsTr("请双击选中对应乐谱进入演奏模式：");
+        score_list.model=scoreLs;
+    }
     function resetScoreList() {
 
         score_groups.model=score_man.scoreGroups();
@@ -193,6 +203,18 @@ ApplicationWindow {
                         text: qsTr("说明")
                         onTriggered: aboutDialog.open()
                     }
+                    // Action {
+                    //     text: qsTr("横屏")
+                    //     onTriggered: {
+                    //         window.contentOrientation = Qt.LandscapeOrientation;
+                    //     }
+                    // }
+                    // Action {
+                    //     text: qsTr("竖屏")
+                    //     onTriggered: {
+                    //         window.contentOrientation = Qt.PortraitOrientation;
+                    //     }
+                    // }
                 }
             }
         }
@@ -248,7 +270,7 @@ ApplicationWindow {
                         height: parent.height
                         onCurrentTextChanged: {
                             reloadScoreLs(currentText);
-
+                            filtertext.text="";
                         }
                         // Layout.width: stackView.width*0.5
                         // model: [qsTr("First"), qsTr("Second"), qsTr("Third")]
@@ -323,6 +345,16 @@ ApplicationWindow {
                             onAccepted: {
                                 score_man.delScoreGroup(score_groups.currentText);
                             }
+                        }
+                    }
+                    TextField {
+                        id:filtertext
+                        width: stackView.width*0.3
+                        height: parent.height
+                        placeholderText: "搜索歌曲"
+                        onTextEdited:{
+                            console.log("filtertext:",filtertext.text);
+                            reloadScoreLsFilter(score_groups.currentText,filtertext.text);
                         }
                     }
                     // anchors.horizontalCenter: parent.horizontalCenter
