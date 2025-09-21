@@ -104,6 +104,9 @@ convertPlayers(const std::vector<Gp7::Track> &tracks, Score &score,
             }
             tuning.setCapo(staff.myCapo);
             player.setTuning(tuning);
+            
+            // Set track-level lyrics to player
+            player.setLyrics(track.myLyrics);
 
             const int player_idx = static_cast<int>(score.getPlayers().size());
             score.insertPlayer(player);
@@ -1237,19 +1240,54 @@ isValidLayout(const std::vector<int> &layout, int num_bars)
     return std::accumulate(layout.begin(), layout.end(), 0) >= num_bars;
 }
 
+/// Generate a layout with specified measures per system.
+static std::vector<int>
+generateCustomLayout(int num_bars, int measures_per_system)
+{
+    std::vector<int> layout;
+    int remaining_bars = num_bars;
+    
+    while (remaining_bars > 0)
+    {
+        int bars_in_system = std::min(measures_per_system, remaining_bars);
+        layout.push_back(bars_in_system);
+        remaining_bars -= bars_in_system;
+    }
+    
+    return layout;
+}
+
 void
 Gp7::convert(const Gp7::Document &doc, Score &score)
 {
+    // Default behavior: use original layout (0 means use original)
+    convert(doc, score, 0);
+}
+
+void
+Gp7::convert(const Gp7::Document &doc, Score &score, int measures_per_system)
+{
     convertScoreInfo(doc.myScoreInfo, score);
 
-    // The multi-track layout is sometimes invalid (particularly for .gpx
-    // files). So, fall back to the first track's layout if we need to.
-    std::vector<int> layout = doc.myScoreInfo.myScoreSystemsLayout;
-    if (!isValidLayout(layout, static_cast<int>(doc.myMasterBars.size())) &&
-        !doc.myTracks.empty())
+    std::vector<int> layout;
+    
+    if (measures_per_system > 0)
     {
-        layout = doc.myTracks[0].mySystemsLayout;
-        assert(isValidLayout(layout, static_cast<int>(doc.myMasterBars.size())));
+        // Generate layout with specified measures per system
+        layout = generateCustomLayout(static_cast<int>(doc.myMasterBars.size()), measures_per_system);
+    }
+    else
+    {
+        // Use the original layout from the file
+        // The multi-track layout is sometimes invalid (particularly for .gpx
+        // files). So, fall back to the first track's layout if we need to.
+        layout = doc.myScoreInfo.myScoreSystemsLayout;
+        if (!isValidLayout(layout, static_cast<int>(doc.myMasterBars.size())) &&
+            !doc.myTracks.empty())
+        {
+            layout = doc.myTracks[0].mySystemsLayout;
+            assert(isValidLayout(layout, static_cast<int>(doc.myMasterBars.size())));
+        }
     }
 
     int bar_idx = 0;

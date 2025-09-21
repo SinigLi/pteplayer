@@ -325,6 +325,19 @@ saveTracks(pugi::xml_node &gpif, const std::vector<Track> &tracks)
                          sound.myPath + ";" + sound.myName + ";" + sound.myRole);
         }
 
+        // Save track-level lyrics
+        if (!track.myLyrics.empty())
+        {
+            auto lyrics_node = track_node.append_child("Lyrics");
+            lyrics_node.append_attribute("dispatched").set_value("true");
+            for (const std::string &lyric_line : track.myLyrics)
+            {
+                auto line_node = lyrics_node.append_child("Line");
+                addCDataNode(line_node, "Text", lyric_line);
+                addValueNode(line_node, "Offset", 0);
+            }
+        }
+
         ++track_idx;
     }
 }
@@ -470,6 +483,19 @@ saveBeats(pugi::xml_node &gpif, const std::unordered_map<int, Beat> &beats_map)
 
         if (!beat.myFreeText.empty())
             addCDataNode(beat_node, "FreeText", beat.myFreeText);
+
+        // Export lyrics to XML
+        if (!beat.myLyrics.empty())
+        {
+            auto lyrics_node = beat_node.append_child("Lyrics");
+            for (const std::string &lyric_line : beat.myLyrics)
+            {
+                // Create child nodes for each lyric line to match import format
+                // Import code uses: node.child("Lyrics").children()
+                auto line_node = lyrics_node.append_child("Line");
+                line_node.text().set(lyric_line.c_str());
+            }
+        }
 
         if (beat.myOttavia)
         {
@@ -684,18 +710,16 @@ to_xml(const Document &doc)
     pugi::xml_document root;
 
     auto gpif = root.append_child("GPIF");
-    addValueNode(gpif, "GPVersion", "7.6.0"s);
+    addValueNode(gpif, "GPVersion", "8.1.1"s);
 
-    // These values are from a recent GP version when this was implemented.
-    // It needs to be sufficiently new in order for the generated XML data to
-    // be interpreted correctly by GP.
+    // Updated to GP8 version values
     auto revision = gpif.append_child("GPRevision");
-    revision.append_attribute("required").set_value("12021");
-    revision.append_attribute("recommended").set_value("12023");
-    revision.text().set("12025");
+    revision.append_attribute("required").set_value("12026");
+    revision.append_attribute("recommended").set_value("13000");
+    revision.text().set("13007");
 
     auto encoding = gpif.append_child("Encoding");
-    addValueNode(encoding, "EncodingDescription", "GP7"s);
+    addValueNode(encoding, "EncodingDescription", "GP8"s);
 
     auto score = gpif.append_child("Score");
     saveScoreInfo(score, doc.myScoreInfo);

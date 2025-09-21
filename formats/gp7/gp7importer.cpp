@@ -28,6 +28,7 @@
 #include <pugixml.hpp>
 
 #include <formats/fileformat.h>
+#include <formats/layoutconfig.h>
 #include <score/score.h>
 #include <util/scopeexit.h>
 //#include <QDebug>
@@ -148,5 +149,5 @@ void Gp7Importer::load(const std::filesystem::path &filename, Score &score)
         throw FileFormatException(result.description());
 
     Gp7::Document doc = Gp7::from_xml(xml_doc, Gp7::Version::V7);
-    Gp7::convert(doc, score);
+    Gp7::convert(doc, score, LayoutConfig::getMeasuresPerSystem());
 }

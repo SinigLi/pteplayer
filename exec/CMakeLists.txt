@@ -10,6 +10,7 @@ qt_standard_project_setup()
 
 qt_add_executable(pteplayer
     ScoreGroupMan.cpp ScoreGroupMan.h
+    LayoutManager.cpp LayoutManager.h
     main.cpp
     scorechart.cpp scorechart.h
 )

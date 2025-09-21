@@ -185,6 +185,8 @@ struct Track
     int myMidiChannel = -1;
 
     std::unordered_map<int, Chord> myChords;
+    /// Track-level lyrics
+    std::vector<std::string> myLyrics;
 };
 
 struct MasterBar

@@ -439,6 +439,7 @@ Pane {
         onAccepted:{
             score_chart.setBpRate(bp_rate_box.value);
             score_chart.setStartBar(start_bar_box.value);
+            
             var playerSetLs = [];
             for(var i = 0;i<playerSetList_model.count;++i)
             {

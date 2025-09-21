@@ -33,3 +33,4 @@ add_subdirectory( util )
 add_subdirectory( exec )
 
 
+add_subdirectory( image_to_gp_converter )

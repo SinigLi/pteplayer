@@ -33,7 +33,7 @@ bool Player::operator==(const Player &other) const
 {
     return myDescription == other.myDescription &&
            myMaxVolume == other.myMaxVolume && myPan == other.myPan &&
-           myTuning == other.myTuning;
+           myTuning == other.myTuning && myLyrics == other.myLyrics;
 }
 
 const std::string &Player::getDescription() const
@@ -80,5 +80,15 @@ const Tuning &Player::getTuning() const
 void Player::setTuning(const Tuning &tuning)
 {
     myTuning = tuning;
+}
+
+const std::vector<std::string> &Player::getLyrics() const
+{
+    return myLyrics;
+}
+
+void Player::setLyrics(const std::vector<std::string> &lyrics)
+{
+    myLyrics = lyrics;
 }
 

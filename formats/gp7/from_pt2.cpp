@@ -370,6 +370,9 @@ convertTracks(const Score &score, ChordNameIdMap &chord_name_ids)
         // For now we just assign an initial instrument
         track.mySoundChanges.push_back({ 0, 0, 0 });
 
+        // Convert player lyrics to track lyrics
+        track.myLyrics = player.getLyrics();
+
         track.myMidiChannel = Midi::getPlayerChannel(player_idx);
 
         tracks.push_back(std::move(track));
@@ -599,6 +602,13 @@ convertBeat(Gp7::Document &doc, Gp7::MasterBar &master_bar, Gp7::Beat &beat,
             ScoreUtils::findByPosition(system.getChords(), pos.getPosition()))
     {
         beat.myChordId = chord_name_ids.at(text->getChordName());
+    }
+
+    // Export lyrics from Position to GP7 Beat
+    const std::vector<std::string> &lyrics = pos.lyrics();
+    if (!lyrics.empty())
+    {
+        beat.myLyrics = lyrics;
     }
 
     for (const Note &note: pos.getNotes())

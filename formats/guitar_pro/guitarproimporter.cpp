@@ -22,6 +22,7 @@
 #include <formats/gp7/to_pt2.h>
 #include <formats/guitar_pro/document.h>
 #include <formats/guitar_pro/inputstream.h>
+#include <formats/layoutconfig.h>
 #include <fstream>
 
 GuitarProImporter::GuitarProImporter()
@@ -42,5 +43,5 @@ GuitarProImporter::load(const std::filesystem::path &filename, Score &score)
     // Convert to the GP7 intermediate format, which then can be converted to
     // our score format.
     Gp7::Document gp7_doc = Gp::convertToGp7(document);
-    Gp7::convert(gp7_doc, score);
+    Gp7::convert(gp7_doc, score, LayoutConfig::getMeasuresPerSystem());
 }

@@ -95,6 +95,9 @@ public:
     Q_INVOKABLE QVariantList orgPlayerSetting()const;
     Q_INVOKABLE QVariantList curPlayerSetting()const;
 
+    Q_INVOKABLE int curMeasuresPerSystem();
+    Q_INVOKABLE void setMeasuresPerSystem(int measures);
+
     // Q_INVOKABLE void setBaseScoreGroup(const QString &scoreGroup);
 signals:
     void viewHadChanged();

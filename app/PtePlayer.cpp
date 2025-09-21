@@ -1,6 +1,7 @@
 #include "PtePlayer.h"
 #include "ui_PtePlayer.h"
 
+#include <algorithm>
 #include <actions/addalternateending.h>
 #include <actions/addbarline.h>
 #include <actions/addchordtext.h>
@@ -887,7 +888,10 @@ void PtePlayer::moveCaretToSystem(int system)
     //mTickPlayer->play();
 //#endif
     getCaret().moveToSystem(system, true);
-    QRectF srect = mScoreArea->getSysRect(system,myPerShowSysCount );
+    // 让光标显示在中间偏上位置：向前偏移约1/3的显示系统数
+    int offsetSystems = (myPerShowSysCount * 2) / 5;  // 约40%偏移，让光标在中间偏上
+    int startSystem = std::max(0, system - offsetSystems);
+    QRectF srect = mScoreArea->getSysRect(startSystem, myPerShowSysCount);
     emit caretMvRect(srect);
 }
 
@@ -950,7 +954,10 @@ void PtePlayer::moveCaretToPosition(int position)
     //#endif
     getCaret().moveToPosition(position);
 
-    QRectF srect = mScoreArea->getSysRect(sys, myPerShowSysCount);
+    // 让光标显示在中间偏上位置：向前偏移约1/3的显示系统数
+    int offsetSystems = (myPerShowSysCount * 2) / 5;  // 约40%偏移，让光标在中间偏上
+    int startSystem = std::max(0, sys - offsetSystems);
+    QRectF srect = mScoreArea->getSysRect(startSystem, myPerShowSysCount);
     emit caretMvRect(srect);
 }
 

@@ -53,6 +53,11 @@ public:
     /// Sets the player's tuning.
     void setTuning(const Tuning &tuning);
 
+    /// Returns the player's lyrics.
+    const std::vector<std::string> &getLyrics() const;
+    /// Sets the player's lyrics.
+    void setLyrics(const std::vector<std::string> &lyrics);
+
     static const uint8_t MIN_VOLUME;
     static const uint8_t MAX_VOLUME;
     static const uint8_t MIN_PAN;
@@ -63,6 +68,7 @@ private:
     uint8_t myMaxVolume;
     uint8_t myPan;
     Tuning myTuning;
+    std::vector<std::string> myLyrics;
 };
 
 template <class Archive>
@@ -72,6 +78,7 @@ void Player::serialize(Archive &ar, const FileVersion /*version*/)
     ar("max_volume", myMaxVolume);
     ar("pan", myPan);
     ar("tuning", myTuning);
+    ar("lyrics", myLyrics);
 }
 
 #endif

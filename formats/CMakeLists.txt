@@ -11,6 +11,7 @@ qt_standard_project_setup()
 qt_add_library(pteformats STATIC
     fileformat.cpp fileformat.h
     fileformatmanager.cpp fileformatmanager.h
+    layoutconfig.cpp layoutconfig.h
     gp7/document.cpp gp7/document.h
     gp7/from_pt2.cpp gp7/from_pt2.h
     gp7/from_xml.cpp

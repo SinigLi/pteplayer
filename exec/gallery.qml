@@ -200,6 +200,10 @@ ApplicationWindow {
                     //     onTriggered: window.help()
                     // }
                     Action {
+                        text: qsTr("曲谱布局选项")
+                        onTriggered: layoutDialog.open()
+                    }
+                    Action {
                         text: qsTr("说明")
                         onTriggered: aboutDialog.open()
                     }
@@ -527,6 +531,8 @@ ApplicationWindow {
                 Layout.fillWidth: true
             }
 
+
+
             Label {
                 text: qsTr("Restart required")
                 color: "#e41e25"
@@ -535,6 +541,65 @@ ApplicationWindow {
                 verticalAlignment: Label.AlignVCenter
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+            }
+        }
+    }
+
+    Dialog {
+        id: layoutDialog
+        modal: true
+        focus: true
+        title: qsTr("曲谱布局选项")
+        x: (window.width - width) / 2
+        y: window.height / 6
+        width: Math.min(window.width, window.height) / 6 * 5
+        standardButtons: Dialog.Ok | Dialog.Cancel
+
+        onAccepted: {
+            LayoutManager.setMeasuresPerSystem(measuresPerSystemSpinBox.value)
+        }
+
+        Column {
+            spacing: 20
+            anchors.fill: parent
+
+            RowLayout {
+                spacing: 10
+                anchors.left: parent.left
+                anchors.right: parent.right
+
+                Label {
+                    text: qsTr("每行小节数:")
+                    Layout.preferredWidth: parent.width * 0.4
+                }
+
+                SpinBox {
+                    id: measuresPerSystemSpinBox
+                    from: 0
+                    to: 6
+                    value: LayoutManager.getMeasuresPerSystem()
+                    Layout.fillWidth: true
+                    
+                    // 只保留字体优化，让数字更清楚
+                    font.pixelSize: 16
+                    font.bold: true
+                    
+                    // 添加文本显示，0表示使用原始布局
+                    textFromValue: function(value, locale) {
+                        if (value === 0) {
+                            return qsTr("自动")
+                        }
+                        return value.toString()
+                    }
+                }
+            }
+
+            Label {
+                width: parent.width
+                text: qsTr("设置每行显示的小节数量。0表示使用谱子自带的布局，1-6表示强制每行显示指定数量的小节。")
+                wrapMode: Label.Wrap
+                font.pixelSize: 12
+                color: "#666666"
             }
         }
     }

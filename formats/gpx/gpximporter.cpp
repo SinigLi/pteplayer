@@ -21,6 +21,7 @@
 
 #include <formats/gp7/document.h>
 #include <formats/gp7/to_pt2.h>
+#include <formats/layoutconfig.h>
 #include <score/score.h>
 
 #include <fstream>
@@ -54,5 +55,5 @@ GpxImporter::load(const std::filesystem::path &filename, Score &score)
 #endif
 
     Gp7::Document doc = Gp7::from_xml(xml_doc, Gp7::Version::V6);
-    Gp7::convert(doc, score);
+    Gp7::convert(doc, score, LayoutConfig::getMeasuresPerSystem());
 }

@@ -54,6 +54,7 @@
 #include <QGraphicsView>
 #include <QTimer>
 #include <app/ScoreFileLoader.h>
+#include <formats/layoutconfig.h>
 //![0]
 //QTimer timmer;
 ScoreChart::ScoreChart(QQuickItem *parent)
@@ -399,6 +400,15 @@ void ScoreChart::caculateSysSizeByHeight(int width,int height)
     m_player->setPerShowSysCount(syscount);
 }
 
+int ScoreChart::curMeasuresPerSystem()
+{
+    return LayoutConfig::getMeasuresPerSystem();
+}
+
+void ScoreChart::setMeasuresPerSystem(int measures)
+{
+    LayoutConfig::setMeasuresPerSystem(measures);
+}
 
 void
 ScoreChart::_caretMvRect(QRectF rect)

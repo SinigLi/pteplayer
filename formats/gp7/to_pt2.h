@@ -27,6 +27,10 @@ struct Document;
 /// Converts the Guitar Pro document into the provided score.
 void convert(const Gp7::Document &doc, Score &score);
 
+/// Converts the Guitar Pro document into the provided score with custom layout.
+/// @param measures_per_system Number of measures per system (line). If 0, use original layout.
+void convert(const Gp7::Document &doc, Score &score, int measures_per_system);
+
 } // namespace Gp7
 
 #endif

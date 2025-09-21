@@ -320,6 +320,24 @@ parseTracks(const pugi::xml_node &tracks_node, Gp7::Version version)
         // TODO - import sound automations (Guitar Pro's equivalent to player /
         // instrument changes).
 
+        // Parse track-level lyrics
+        const pugi::xml_node lyrics_node = node.child("Lyrics");
+        if (lyrics_node)
+        {
+            for (const pugi::xml_node &line_node : lyrics_node.children("Line"))
+            {
+                const pugi::xml_node text_node = line_node.child("Text");
+                if (text_node)
+                {
+                    track.myLyrics.push_back(text_node.text().as_string());
+                }
+                else
+                {
+                    track.myLyrics.push_back("");
+                }
+            }
+        }
+
         tracks.push_back(track);
     }
 

@@ -39,8 +39,8 @@ convertScoreInfo(const Gp::Document &doc)
     gp7_info.myNotices = boost::algorithm::join(header.myNotices, "\n");
 
     // Decide how the measures are split into systems.
-    // For now just do three measures per system.
-    static constexpr int measures_per_system = 3;
+    // For now just do 4 measures per system (can be overridden by caller).
+    static constexpr int measures_per_system = 4;
     const int num_measures = static_cast<int>(doc.myMeasures.size());
     const int num_systems = num_measures / measures_per_system;
     const int remainder =  num_measures % measures_per_system;

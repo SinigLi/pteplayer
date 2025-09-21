@@ -20,6 +20,7 @@
 #include <app/powertabeditor.h>
 #include <app/settings.h>
 #include <app/settingsmanager.h>
+#include <formats/layoutconfig.h>
 #include <csignal>
 #include <dialogs/crashdialog.h>
 #include <exception>
@@ -40,6 +41,12 @@
 #include <fstream>
 #include <QFile>
 #include <app/ScoreFileLoader.h>
+#include <formats/gp7/gp7importer.h>
+#include <formats/gp7/gp7exporter.h>
+#include <score/score.h>
+
+// Function declaration for GP lyrics test
+void testGpLyricsImportExport(const QString &inputFile, const QString &outputFile);
 
 #include <streambuf>
 class QRDebuff:public std::streambuf
@@ -333,7 +340,9 @@ int main(int argc, char *argv[])
 
     // Parse command line arguments.
     QStringList files_to_open;
-    {
+	if(0){
+		testGpLyricsImportExport(QString::fromWCharArray(L"G:/learn/吉他/我管你-完整.gp"),
+            QString::fromWCharArray(L"G:/learn/吉他/我管你-完整2.gp"));
         QCommandLineParser parser;
         parser.setApplicationDescription(QCoreApplication::translate(
             "PowerTabEditor", "A guitar tablature editor."));
@@ -344,15 +353,37 @@ int main(int argc, char *argv[])
             QCoreApplication::translate("PowerTabEditor",
                                         "The files to be opened"),
             QStringLiteral("[files...]"));
+        
+        // Add test option for GP lyrics
+        QCommandLineOption testLyricsOption(QStringList() << "test-lyrics",
+            QCoreApplication::translate("PowerTabEditor", "Test GP lyrics import/export"),
+            QCoreApplication::translate("PowerTabEditor", "input_file,output_file"));
+        parser.addOption(testLyricsOption);
+        
         parser.process(a);
 
         files_to_open = parser.positionalArguments();
+        
+        // Check if lyrics test is requested
+        if (parser.isSet(testLyricsOption)) {
+            QString testFiles = parser.value(testLyricsOption);
+            QStringList fileList = testFiles.split(',');
+            if (fileList.size() >= 2) {
+                testGpLyricsImportExport(fileList[0].trimmed(), fileList[1].trimmed());
+                return EXIT_SUCCESS;
+            } else {
+                qDebug() << "Error: --test-lyrics requires input_file,output_file";
+                return EXIT_FAILURE;
+            }
+        }
     }
 
     {
         SettingsManager settings_manager;
         settings_manager.load(Paths::getConfigDir());
         ScoreFileLoader::instace().init();
+        
+        // LayoutConfig uses default value (4 measures per system)
         // qDebug()<<"getConfigDir "<<Paths::getConfigDir().c_str();
         // qDebug()<<"getUserDataDir "<<Paths::getUserDataDir().c_str();
         // qDebug()<<"getHomeDir "<<Paths::getHomeDir().c_str();
@@ -516,7 +547,90 @@ int main(int argc, char *argv[])
     //                          player.play();
     //                      }
     //                  });
+    
+    // Test GP lyrics import/export functionality
+    // Uncomment the lines below to test with your GP files
+    /*
+    QString testInputFile = "C:/path/to/your/test.gp";  // Change this path
+    QString testOutputFile = "C:/path/to/your/output.gp"; // Change this path
+    testGpLyricsImportExport(testInputFile, testOutputFile);
+    */
+    
     return a.exec();
+}
+
+// Test function for GP file import/export with lyrics
+void testGpLyricsImportExport(const QString &inputFile, const QString &outputFile)
+{
+    try {
+        qDebug() << "=== GP Lyrics Import/Export Test ===";
+        qDebug() << "Input file:" << inputFile;
+        qDebug() << "Output file:" << outputFile;
+        
+        // Check if input file exists
+        if (!QFile::exists(inputFile)) {
+            qDebug() << "Error: Input file does not exist:" << inputFile;
+            return;
+        }
+        
+        // Import GP file
+        qDebug() << "Step 1: Importing GP file...";
+        
+        Gp7Importer importer;
+        Score score;
+        
+        std::filesystem::path inputPath = inputFile.toLocal8Bit().toStdString();
+        importer.load(inputPath, score);
+        
+        qDebug() << "Import successful!";
+        qDebug() << "Score systems count:" << score.getSystems().size();
+        
+        // Check for lyrics in players
+        qDebug() << "Players count:" << score.getPlayers().size();
+        
+        for (size_t playerIdx = 0; playerIdx < score.getPlayers().size(); ++playerIdx) {
+            const auto &player = score.getPlayers()[playerIdx];
+            const auto &lyrics = player.getLyrics();
+            
+            if (!lyrics.empty()) {
+                qDebug() << QString("Player %1 (\"%2\") has %3 lyric lines:")
+                            .arg(playerIdx)
+                            .arg(QString::fromStdString(player.getDescription()))
+                            .arg(lyrics.size());
+                
+                for (size_t i = 0; i < lyrics.size() && i < 5; ++i) { // Show first 5 lines
+                    QString preview = QString::fromStdString(lyrics[i]);
+                    if (preview.length() > 100) {
+                        preview = preview.left(100) + "...";
+                    }
+                    qDebug() << QString("  Line %1: \"%2\"").arg(i).arg(preview);
+                }
+                
+                if (lyrics.size() > 5) {
+                    qDebug() << QString("  ... and %1 more lines").arg(lyrics.size() - 5);
+                }
+            } else {
+                qDebug() << QString("Player %1 (\"%2\") has no lyrics")
+                            .arg(playerIdx)
+                            .arg(QString::fromStdString(player.getDescription()));
+            }
+        }
+        
+        // Export GP file
+        qDebug() << "Step 2: Exporting GP file...";
+        Gp7Exporter exporter;
+        std::filesystem::path outputPath = outputFile.toLocal8Bit().toStdString();
+        exporter.save(outputPath, score);
+        
+        qDebug() << "Export successful!";
+        qDebug() << "Output file created:" << outputFile;
+        qDebug() << "=== Test completed successfully ===";
+        
+    } catch (const std::exception &e) {
+        qDebug() << "Error during GP import/export test:" << QString::fromStdString(e.what());
+    } catch (...) {
+        qDebug() << "Unknown error during GP import/export test";
+    }
 }
 
 /**/
